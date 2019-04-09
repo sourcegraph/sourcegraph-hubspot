@@ -24,15 +24,11 @@ export function activate(ctx: sourcegraph.ExtensionContext): void {
                     }
                 }
 
-                const u = new URL('https://api.hubapi.com/companies/v2/companies/')
-                u.pathname += companyId
-                u.searchParams.set('hapikey', apiKey)
-
-                const resp = await fetch(`${u}`, { headers: { 'Content-Type': 'application/json' } })
-                if (resp.status !== 200) {
+                const resp = await getCompanyInfo(apiKey, companyId)
+                if (!resp) {
                     return null
                 }
-                const { properties: props } = await resp.json()
+                const props = resp.properties
                 const issuesUrl = `https://github.com/issues?utf8=%E2%9C%93&q=is%3Aopen+archived%3Afalse+${companyId}`
                 return {
                     content: props.name
@@ -59,4 +55,42 @@ export function activate(ctx: sourcegraph.ExtensionContext): void {
             },
         })
     )
+}
+
+const cache = new Map<string, any>()
+
+let shownPermissionsRequestAlert = false
+
+async function getCompanyInfo(apiKey: string, companyId: string): Promise<{ properties: any } | null> {
+    const cachedData = cache.get(companyId)
+    if (cachedData) {
+        return cachedData
+    }
+
+    const u = new URL('https://api.hubapi.com/companies/v2/companies/')
+    u.pathname += companyId
+    u.searchParams.set('hapikey', apiKey)
+
+    try {
+        const resp = await fetch(`${u}`, {
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'omit',
+        })
+        if (resp.status !== 200) {
+            return null
+        }
+        const data = await resp.json()
+        cache.set(companyId, data)
+        return data
+    } catch (err) {
+        if (sourcegraph.app.activeWindow && !shownPermissionsRequestAlert) {
+            // Request permissions to bypass CORS.
+            shownPermissionsRequestAlert = true
+            sourcegraph.app.activeWindow.showNotification(
+                'To see HubSpot link info, you must visit<br>https://api.hubapi.com/404 and right-click the<br> Sourcegraph toolbar icon to<br> **Enable Sourcegraph on this domain**.',
+                sourcegraph.NotificationType.Error
+            )
+        }
+        return null
+    }
 }

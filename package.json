@@ -1,0 +1,57 @@
+{
+  "name": "hubspot",
+  "description": "HubSpot (customer) link previews in GitHub Issues",
+  "publisher": "sourcegraph",
+  "activationEvents": [
+    "*"
+  ],
+  "wip": true,
+  "contributes": {
+    "configuration": {
+      "title": "HubSpot configuration",
+      "type": "object",
+      "required": [
+        "hubspot.apiKey"
+      ],
+      "properties": {
+        "hubspot.apiKey": {
+          "description": "HubSpot API key (HubSpot user menu > Integrations > Integrations > API key)",
+          "type": "string",
+          "examples": [
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+          ]
+        }
+      }
+    }
+  },
+  "version": "0.0.0-DEVELOPMENT",
+  "license": "MIT",
+  "main": "dist/extension.js",
+  "scripts": {
+    "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "parcel build --out-file dist/extension.js src/extension.ts",
+    "serve": "parcel serve --no-hmr --out-file dist/extension.js src/extension.ts",
+    "watch:typecheck": "tsc -p tsconfig.json -w",
+    "watch:build": "tsc -p tsconfig.dist.json -w",
+    "sourcegraph:prepublish": "npm run build"
+  },
+  "browserslist": [
+    "last 1 Chrome versions",
+    "last 1 Firefox versions",
+    "last 1 Edge versions",
+    "last 1 Safari versions"
+  ],
+  "devDependencies": {
+    "@sourcegraph/prettierrc": "^2.2.0",
+    "@sourcegraph/tsconfig": "^4.0.0",
+    "@sourcegraph/tslint-config": "^13.0.0",
+    "parcel-bundler": "^1.11.0",
+    "sourcegraph": "^23.0.0",
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.2"
+  },
+  "dependencies": {
+    "rxjs": "^6.4.0"
+  }
+}

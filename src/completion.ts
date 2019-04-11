@@ -36,7 +36,6 @@ export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable 
                         .map(c => ({ label: c.name, insertText: c.hubspotUrl + ' ' })),
                     [a => !a.label.toLowerCase().startsWith(query)]
                 ),
-                // [{ label: 'AA11' }, { label: 'BB22' }, { label: 'CC33' }, { label: 'DD44' }],
             }
         },
     })

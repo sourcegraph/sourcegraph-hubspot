@@ -1,5 +1,7 @@
 import * as sourcegraph from 'sourcegraph'
 
+const DEFAULT_HEADERS = { 'Content-Type': 'application/json', 'X-Requested-With': 'Sourcegraph' }
+
 const companyInfoCache = new Map<string, any>()
 
 export async function getCompanyInfo(apiKey: string, companyId: string): Promise<{ properties: any } | null> {
@@ -8,13 +10,13 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
         return cachedData
     }
 
-    const u = new URL('https://api.hubapi.com/companies/v2/companies/')
+    const u = new URL('http://localhost:9018/https://api.hubapi.com/companies/v2/companies/')
     u.pathname += companyId
     u.searchParams.set('hapikey', apiKey)
 
     try {
         const resp = await fetch(`${u}`, {
-            headers: { 'Content-Type': 'application/json' },
+            headers: DEFAULT_HEADERS,
             credentials: 'omit',
         })
         if (resp.status !== 200) {
@@ -48,7 +50,7 @@ export async function getAllCompanies(apiKey: string): Promise<Company[] | null>
 
     try {
         const resp = await fetch(`${u}`, {
-            headers: { 'Content-Type': 'application/json' },
+            headers: DEFAULT_HEADERS,
             credentials: 'omit',
         })
         if (resp.status !== 200) {

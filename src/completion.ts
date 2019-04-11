@@ -15,20 +15,21 @@ export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable 
                 return null
             }
 
-            const lines = doc.text.split('\n')
-            const line = lines[pos.line]
-            const pre = line.slice(0, pos.character)
-            const m = pre.match(/^.*?([^\s]*)$/)
-            if (!m || !m[1] || !m[1].startsWith('$')) {
+            const wordRange = doc.getWordRangeAtPosition(pos)
+            if (!wordRange) {
                 return null
             }
-            const query = m[1].slice(1).toLowerCase()
+            const word = doc.text.slice(doc.offsetAt(wordRange.start), doc.offsetAt(wordRange.end))
+            if (!word.startsWith('$')) {
+                return null
+            }
 
             const allCompanies = await getAllCompanies(apiKey)
             if (!allCompanies) {
                 return null
             }
 
+            const query = word.replace(/^\$/, '').toLowerCase()
             return {
                 items: sortBy(
                     allCompanies

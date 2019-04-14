@@ -1,8 +1,14 @@
 import * as sourcegraph from 'sourcegraph'
+import { CachedAsyncValue, CachedMap } from './cache'
+import { getAPIKey } from './extension'
 
 const DEFAULT_HEADERS = { 'Content-Type': 'application/json', 'X-Requested-With': 'Sourcegraph' }
 
-const companyInfoCache = new Map<string, any>()
+// When using on Sourcegraph (not via browser extension), use cors-anywhere with PORT=9018 to bypass
+// the CORS restrictions of the HubSpot API.
+const URL_PREFIX = sourcegraph.internal.clientApplication === 'sourcegraph' ? 'http://localhost:9018/' : ''
+
+const companyInfoCache = new CachedMap<string, any>('companyInfo')
 
 export async function getCompanyInfo(apiKey: string, companyId: string): Promise<{ properties: any } | null> {
     const cachedData = companyInfoCache.get(companyId)
@@ -15,15 +21,20 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
     u.searchParams.set('hapikey', apiKey)
 
     try {
-        const resp = await fetch(`${u}`, {
+        const data = fetch(`${u}`, {
             headers: DEFAULT_HEADERS,
             credentials: 'omit',
         })
-        if (resp.status !== 200) {
-            return null
-        }
-        const data = await resp.json()
-        companyInfoCache.set(companyId, data)
+            .then(async resp => {
+                if (resp.status === 200) {
+                    return resp.json()
+                }
+                throw new Error(await resp.text())
+            })
+            .then(async data => {
+                await companyInfoCache.set(companyId, data)
+                return data
+            })
         return data
     } catch (err) {
         showPermissionsRequestAlert()
@@ -31,22 +42,44 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
     }
 }
 
-interface Company {
+export interface Company {
     name: string
     hubspotUrl: string
 }
 
-let allCompaniesCache: Promise<Company[] | null>
+export const allCompaniesCache = new CachedAsyncValue<Company[]>('allCompanies', getAllCompanies)
 
-export async function getAllCompanies(apiKey: string): Promise<Company[] | null> {
-    if (allCompaniesCache) {
-        return allCompaniesCache
+async function getAllCompanies(): Promise<Company[]> {
+    const apiKey = getAPIKey()
+    if (!apiKey) {
+        throw new Error('Error: HubSpot API key not set (hubspot.apiKey)')
     }
 
-    const u = new URL('https://api.hubapi.com/companies/v2/companies/paged')
+    const LIMIT = 250
+    let offset = 0
+    const allCompanies: Company[] = []
+    while (true) {
+        const { companies, nextOffset } = await getCompanies(apiKey, offset, LIMIT)
+        console.log('Fetched companies from HubSpot', companies.length)
+        allCompanies.push(...companies)
+        if (!nextOffset) {
+            break
+        }
+        offset = nextOffset
+    }
+    return allCompanies
+}
+
+async function getCompanies(
+    apiKey: string,
+    offset: number,
+    limit: number
+): Promise<{ companies: Company[]; nextOffset?: number }> {
+    const u = new URL(URL_PREFIX + 'https://api.hubapi.com/companies/v2/companies/paged')
     u.searchParams.set('hapikey', apiKey)
     u.searchParams.set('properties', 'name')
-    u.searchParams.set('limit', '250') // TODO(sqs): get full paginated result set
+    u.searchParams.set('offset', offset.toString())
+    u.searchParams.set('limit', limit.toString())
 
     try {
         const resp = await fetch(`${u}`, {
@@ -54,18 +87,21 @@ export async function getAllCompanies(apiKey: string): Promise<Company[] | null>
             credentials: 'omit',
         })
         if (resp.status !== 200) {
-            return null
+            throw new Error(await resp.text())
         }
         const data = await resp.json()
-        const companies = data.companies.map((c: any) => ({
-            name: c.properties.name.value,
-            hubspotUrl: `https://app.hubspot.com/contacts/${c.portalId}/company/${c.companyId}`,
-        }))
-        allCompaniesCache = Promise.resolve(companies)
-        return companies
+        return {
+            companies: data.companies
+                .filter((c: any) => !!c.properties.name)
+                .map((c: any) => ({
+                    name: c.properties.name.value,
+                    hubspotUrl: `https://app.hubspot.com/contacts/${c.portalId}/company/${c.companyId}`,
+                })),
+            nextOffset: data.offset,
+        }
     } catch (err) {
         showPermissionsRequestAlert()
-        return null
+        throw err
     }
 }
 

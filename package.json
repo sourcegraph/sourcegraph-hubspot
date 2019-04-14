@@ -57,6 +57,7 @@
     "typescript": "^3.4.2"
   },
   "dependencies": {
+    "localforage": "^1.7.3",
     "lodash": "^4.17.11",
     "rxjs": "^6.4.0"
   }

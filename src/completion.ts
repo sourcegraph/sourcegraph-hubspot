@@ -1,7 +1,7 @@
 import { sortBy } from 'lodash'
 import * as sourcegraph from 'sourcegraph'
 import { getAPIKey } from './extension'
-import { getAllCompanies } from './hubspot'
+import { allCompaniesCache, Company } from './hubspot'
 
 export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable {
     return sourcegraph.languages.registerCompletionItemProvider([{ scheme: 'comment' }], {
@@ -24,19 +24,28 @@ export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable 
                 return null
             }
 
-            const allCompanies = await getAllCompanies(apiKey)
+            const allCompanies = await allCompaniesCache.get()
             if (!allCompanies) {
                 return null
             }
 
             const query = word.replace(/^\$/, '').toLowerCase()
+
+            const MAX_MATCHES = 25
+            const matches: Company[] = []
+            for (const c of allCompanies) {
+                if (c.name.toLowerCase().includes(query)) {
+                    matches.push(c)
+                    if (matches.length >= MAX_MATCHES) {
+                        break
+                    }
+                }
+            }
+
             return {
-                items: sortBy(
-                    allCompanies
-                        .filter(c => c.name.toLowerCase().includes(query))
-                        .map(c => ({ label: c.name, insertText: c.hubspotUrl + ' ' })),
-                    [a => !a.label.toLowerCase().startsWith(query)]
-                ),
+                items: sortBy(matches.map(c => ({ label: c.name, insertText: c.hubspotUrl + ' ' })), [
+                    a => !a.label.toLowerCase().startsWith(query),
+                ]),
             }
         },
     })

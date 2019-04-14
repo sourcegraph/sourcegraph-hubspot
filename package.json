@@ -5,6 +5,10 @@
   "activationEvents": [
     "*"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sourcegraph/sourcegraph-hubspot"
+  },
   "wip": true,
   "contributes": {
     "configuration": {

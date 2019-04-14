@@ -1,5 +1,7 @@
 import localforage from 'localforage'
 
+const REFRESH_FREQUENCY = 0.01
+
 localforage.config({
     driver: localforage.INDEXEDDB,
     name: 'sourcegraph-hubspot',
@@ -27,7 +29,7 @@ export class CachedMap<K extends string, V> {
         const cached = localforage.getItem<V | undefined>(this.getFullKey(key))
 
         // Every once in a while, return a false cache miss so that we occasionally refresh this data.
-        if (cached && Math.random() < 0.95) {
+        if (cached && Math.random() > REFRESH_FREQUENCY) {
             return cached
         }
         return undefined
@@ -68,7 +70,7 @@ export class CachedAsyncValue<V> {
         const cached = await localforage.getItem<V | null>(this.id)
         if (this.stale && !this.promise) {
             // Don't *always* recompute from scratch, because it's slow.
-            if (cached !== null && Math.random() < 0.95) {
+            if (cached !== null && Math.random() > REFRESH_FREQUENCY) {
                 return cached
             }
 

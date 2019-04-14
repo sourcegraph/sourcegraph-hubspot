@@ -1,5 +1,5 @@
 import * as sourcegraph from 'sourcegraph'
-import { Settings, getAPIKey } from './extension'
+import { getAPIKey } from './extension'
 import { getCompanyInfo } from './hubspot'
 
 export function registerLinkPreviewProvider(): sourcegraph.Unsubscribable {

@@ -1,6 +1,6 @@
 {
   "name": "hubspot",
-  "description": "HubSpot (customer) link previews in GitHub Issues",
+  "description": "HubSpot link previews and customer autocompletion (by name) on GitHub",
   "publisher": "sourcegraph",
   "activationEvents": [
     "*"

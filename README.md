@@ -13,6 +13,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) that enhances
 This extension currently only works on GitHub (and GitHub Enterprise), not on Sourcegraph or other code hosts.
 
 1. Install the [Sourcegraph browser extension](https://docs.sourcegraph.com/integration/browser_extension).
+   - In the Sourcegraph browser extension options menu, click the gear (⚙️) and enable **Experimental link previews** and **Experimental text field completion**.
 1. [Enable the HubSpot extension](https://sourcegraph.com/extensions/sourcegraph/hubspot) in the Sourcegraph extension registry (requires sign-in to Sourcegraph).
 1. Configure the HubSpot extension in [Sourcegraph user settings](https://sourcegraph.com/user/settings): `hubspot.apiKey`.
 1. Visit any text area, comment, PR, or issue on GitHub and try the [features](#features) below.

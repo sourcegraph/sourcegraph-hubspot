@@ -11,12 +11,12 @@ const URL_PREFIX = sourcegraph.internal.clientApplication === 'sourcegraph' ? 'h
 const companyInfoCache = new CachedMap<string, any>('companyInfo')
 
 export async function getCompanyInfo(apiKey: string, companyId: string): Promise<{ properties: any } | null> {
-    const cachedData = companyInfoCache.get(companyId)
+    const cachedData = await companyInfoCache.get(companyId)
     if (cachedData) {
         return cachedData
     }
 
-    const u = new URL('https://api.hubapi.com/companies/v2/companies/')
+    const u = new URL(URL_PREFIX + 'https://api.hubapi.com/companies/v2/companies/')
     u.pathname += companyId
     u.searchParams.set('hapikey', apiKey)
 
@@ -40,7 +40,7 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
         if (err instanceof Error && !err.message.includes('Non-200')) {
             showPermissionsRequestAlert()
         }
-        return null
+        throw err
     }
 }
 

@@ -29,7 +29,7 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
                 if (resp.status === 200) {
                     return resp.json()
                 }
-                throw new Error(await resp.text())
+                throw new Error(`Non-200 response: ${await resp.text()}`)
             })
             .then(async data => {
                 await companyInfoCache.set(companyId, data)
@@ -37,7 +37,9 @@ export async function getCompanyInfo(apiKey: string, companyId: string): Promise
             })
         return data
     } catch (err) {
-        showPermissionsRequestAlert()
+        if (err instanceof Error && !err.message.includes('Non-200')) {
+            showPermissionsRequestAlert()
+        }
         return null
     }
 }
@@ -87,7 +89,7 @@ async function getCompanies(
             credentials: 'omit',
         })
         if (resp.status !== 200) {
-            throw new Error(await resp.text())
+            throw new Error(`Non-200 response: ${await resp.text()}`)
         }
         const data = await resp.json()
         return {
@@ -100,7 +102,9 @@ async function getCompanies(
             nextOffset: data.offset,
         }
     } catch (err) {
-        showPermissionsRequestAlert()
+        if (err instanceof Error && !err.message.includes('Non-200')) {
+            showPermissionsRequestAlert()
+        }
         throw err
     }
 }
@@ -111,7 +115,9 @@ function showPermissionsRequestAlert(): void {
         // Request permissions to bypass CORS.
         shownPermissionsRequestAlert = true
         sourcegraph.app.activeWindow.showNotification(
-            'To see HubSpot info, you must visit https://api.hubapi.com/404 and right-click the Sourcegraph toolbar icon to **Enable Sourcegraph on this domain**.',
+            sourcegraph.internal.clientApplication === 'other'
+                ? 'To see HubSpot info, you must visit https://api.hubapi.com/404 and right-click the Sourcegraph toolbar icon to **Enable Sourcegraph on this domain**.'
+                : "The HubSpot extension does not work on the Sourcegraph web app due to HubSpot's CORS policy. As a workaround, you can run `cors-anywhere` locally:\n\n```shell\ngit clone https://github.com/Rob--W/cors-anywhere\ncd cors-anywhere\nPORT=9018 node server.js\n```\n\nThen try again.",
             sourcegraph.NotificationType.Error
         )
     }

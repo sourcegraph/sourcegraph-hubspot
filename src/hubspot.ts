@@ -111,7 +111,7 @@ function showPermissionsRequestAlert(): void {
         // Request permissions to bypass CORS.
         shownPermissionsRequestAlert = true
         sourcegraph.app.activeWindow.showNotification(
-            'To see HubSpot info, you must visit<br>https://api.hubapi.com/404 and right-click the<br> Sourcegraph toolbar icon to<br> **Enable Sourcegraph on this domain**.',
+            'To see HubSpot info, you must visit https://api.hubapi.com/404 and right-click the Sourcegraph toolbar icon to **Enable Sourcegraph on this domain**.',
             sourcegraph.NotificationType.Error
         )
     }

@@ -4,7 +4,7 @@ import { getAPIKey } from './extension'
 import { allCompaniesCache, Company } from './hubspot'
 
 export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable {
-    return sourcegraph.languages.registerCompletionItemProvider([{ scheme: 'comment' }], {
+    return sourcegraph.languages.registerCompletionItemProvider([{ scheme: 'comment' }, { scheme: 'snippet' }], {
         provideCompletionItems: async (doc, pos) => {
             const apiKey = getAPIKey()
             if (!apiKey) {

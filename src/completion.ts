@@ -43,7 +43,7 @@ export function registerCompanyCompletionProvider(): sourcegraph.Unsubscribable 
             }
 
             return {
-                items: sortBy(matches.map(c => ({ label: c.name, insertText: c.hubspotUrl + ' ' })), [
+                items: sortBy(matches.map(c => ({ label: c.name, description: ' ', insertText: c.hubspotUrl + ' ' })), [
                     a => !a.label.toLowerCase().startsWith(query),
                 ]),
             }

@@ -116,7 +116,7 @@ function showPermissionsRequestAlert(): void {
         shownPermissionsRequestAlert = true
         sourcegraph.app.activeWindow.showNotification(
             sourcegraph.internal.clientApplication === 'other'
-                ? 'To see HubSpot info, you must visit https://api.hubapi.com/404 and right-click the Sourcegraph toolbar icon to **Enable Sourcegraph on this domain**.'
+                ? 'To see HubSpot info, you must visit https://api.hubapi.com/404 (which is intentionally a 404 page) and right-click the Sourcegraph toolbar icon to **Enable Sourcegraph on this domain**.'
                 : "The HubSpot extension does not work on the Sourcegraph web app due to HubSpot's CORS policy. As a workaround, you can run `cors-anywhere` locally:\n\n```shell\ngit clone https://github.com/Rob--W/cors-anywhere\ncd cors-anywhere\nPORT=9018 node server.js\n```\n\nThen try again.",
             sourcegraph.NotificationType.Error
         )

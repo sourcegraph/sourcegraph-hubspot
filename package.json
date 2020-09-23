@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/sourcegraph/sourcegraph-hubspot"
   },
+  "categories": ["External services"],
   "wip": true,
   "contributes": {
     "configuration": {

@@ -19,7 +19,7 @@ export class CachedMap<K extends string, V> {
     /**
      * @param id The unique ID of this map to distinguish it from other items in the cache.
      */
-    constructor(private id: string) {}
+    constructor(private readonly id: string) {}
 
     private getFullKey(key: K): string {
         return `${this.id}__${key}`
@@ -52,7 +52,7 @@ export class CachedAsyncValue<V> {
     /**
      * @param id The unique ID of this value to distinguish it from other items in the cache.
      */
-    constructor(private id: string, private compute: () => Promise<V>) {}
+    constructor(private readonly id: string, private readonly compute: () => Promise<V>) {}
 
     private async computeAndStore(): Promise<void> {
         this.promise = this.compute()

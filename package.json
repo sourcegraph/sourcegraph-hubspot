@@ -55,7 +55,7 @@
     "parcel-bundler": "^1.11.0",
     "sourcegraph": "^24.7.0",
     "tslint": "^5.15.0",
-    "typescript": "^3.4.2"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
     "localforage": "^1.7.3",
